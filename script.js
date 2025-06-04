@@ -1,29 +1,29 @@
 class CaroGame {    constructor() {
-        this.BOARD_SIZE = 15; // TÄƒng kĂ­ch thÆ°á»›c bĂ n cá» lĂªn 15x15
+        this.BOARD_SIZE = 15; // Tăng kích thước bàn cờ lên 15x15
         this.EMPTY = '';
         this.HUMAN = 'O';
         this.AI = 'X';
-        this.WINNING_LENGTH = 5; // Sá»‘ quĂ¢n liĂªn tiáº¿p Ä‘á»ƒ tháº¯ng lĂ  5
+        this.WINNING_LENGTH = 5; // Số quân liên tiếp để thắng là 5
         
-        // Há»‡ sá»‘ Ä‘iá»ƒm cho cĂ¡c máº«u táº¥n cĂ´ng
-        this.ATTACK_SCORES = {            WIN: 100000,        // Tháº¯ng (5 quĂ¢n liĂªn tiáº¿p)
-            FOUR_OPEN: 15000,  // 4 quĂ¢n 2 Ä‘áº§u má»Ÿ
-            FOUR_CLOSED: 5000, // 4 quĂ¢n 1 Ä‘áº§u má»Ÿ
-            THREE_OPEN: 3000,  // 3 quĂ¢n 2 Ä‘áº§u má»Ÿ
-            TWO_CLOSED: 100,   // 2 quĂ¢n 1 Ä‘áº§u má»Ÿ
-            ONE: 10,           // 1 quĂ¢n
-            DIAGONAL_BONUS: 1.5 // Há»‡ sá»‘ cá»™ng thĂªm cho Ä‘Æ°á»ng chĂ©o
+        // Hệ số điểm cho các mẫu tấn công
+        this.ATTACK_SCORES = {            WIN: 100000,        // Thắng (5 quân liên tiếp)
+            FOUR_OPEN: 15000,  // 4 quân 2 đầu mở
+            FOUR_CLOSED: 5000, // 4 quân 1 đầu mở
+            THREE_OPEN: 3000,  // 3 quân 2 đầu mở
+            TWO_CLOSED: 100,   // 2 quân 1 đầu mở
+            ONE: 10,           // 1 quân
+            DIAGONAL_BONUS: 1.5 // Hệ số cộng thêm cho đường chéo
         };
 
-        // Há»‡ sá»‘ Ä‘iá»ƒm cho phĂ²ng thá»§
-        this.DEFENSE_SCORES = {            BLOCK_WIN: 90000,         // Cháº·n 5 quĂ¢n
-            BLOCK_FOUR_OPEN: 14000,   // Cháº·n 4 quĂ¢n 2 Ä‘áº§u má»Ÿ
-            BLOCK_FOUR_CLOSED: 4500,  // Cháº·n 4 quĂ¢n 1 Ä‘áº§u má»Ÿ
-            BLOCK_TWO_OPEN: 450,   // Cháº·n 2 quĂ¢n 2 Ä‘áº§u má»Ÿ
-            DIAGONAL_BONUS: 1.3    // Há»‡ sá»‘ cá»™ng thĂªm cho Ä‘Æ°á»ng chĂ©o
+        // Hệ số điểm cho phòng thủ
+        this.DEFENSE_SCORES = {            BLOCK_WIN: 90000,         // Chặn 5 quân
+            BLOCK_FOUR_OPEN: 14000,   // Chặn 4 quân 2 đầu mở
+            BLOCK_FOUR_CLOSED: 4500,  // Chặn 4 quân 1 đầu mở
+            BLOCK_TWO_OPEN: 450,   // Chặn 2 quân 2 đầu mở
+            DIAGONAL_BONUS: 1.3    // Hệ số cộng thêm cho đường chéo
         };
 
-        // Khá»Ÿi táº¡o bĂ n cá»
+        // Khởi tạo bàn cờ
         this.board = Array(this.BOARD_SIZE).fill().map(() => Array(this.BOARD_SIZE).fill(this.EMPTY));
         this.gameOver = false;
         this.isProcessing = false;
@@ -69,28 +69,28 @@ class CaroGame {    constructor() {
         const candidateMoves = this.getCandidateMoves();
         let bestMove = null;
         let bestScore = -Infinity;
-        let bestTotalScore = -Infinity; // DĂ¹ng cho xá»­ lĂ½ trÆ°á»ng há»£p Ä‘á»“ng háº¡ng
+        let bestTotalScore = -Infinity; // Dùng cho xử lý trường hợp đồng hạng
 
         for (const move of candidateMoves) {
-            // Thá»­ nÆ°á»›c Ä‘i
+            // Thử nước đi
             this.board[move.row][move.col] = this.AI;
             
-            // TĂ­nh Ä‘iá»ƒm táº¥n cĂ´ng vĂ  phĂ²ng thá»§
+            // Tính điểm tấn công và phòng thủ
             const attackScore = this.evaluateAttack(move.row, move.col);
             const defenseScore = this.evaluateDefense(move.row, move.col);
             
-            // Láº¥y Ä‘iá»ƒm cao nháº¥t giá»¯a táº¥n cĂ´ng vĂ  phĂ²ng thá»§
+            // Lấy điểm cao nhất giữa tấn công và phòng thủ
             const score = Math.max(attackScore, defenseScore);
-            const totalScore = attackScore + defenseScore; // DĂ¹ng cho xá»­ lĂ½ Ä‘á»“ng háº¡ng
+            const totalScore = attackScore + defenseScore; // Dùng cho xử lý đồng hạng
             
-            // Cáº­p nháº­t nÆ°á»›c Ä‘i tá»‘t nháº¥t
+            // Cập nhật nước đi tốt nhất
             if (score > bestScore || (score === bestScore && totalScore > bestTotalScore)) {
                 bestScore = score;
                 bestTotalScore = totalScore;
                 bestMove = move;
             }
             
-            // HoĂ n tĂ¡c nÆ°á»›c Ä‘i thá»­
+            // Hoàn tác nước đi thử
             this.board[move.row][move.col] = this.EMPTY;
         }
 
@@ -100,13 +100,13 @@ class CaroGame {    constructor() {
     getCandidateMoves() {
         const moves = [];
         
-        // NÆ°á»›c Ä‘i Ä‘áº§u tiĂªn - Ä‘Ă¡nh vĂ o trung tĂ¢m hoáº·c xung quanh
+        // Nước đi đầu tiên - đánh vào trung tâm hoặc xung quanh
         if (this.isBoardEmpty()) {
             const center = Math.floor(this.BOARD_SIZE / 2);
             return [{ row: center, col: center }];
         }
 
-        // TĂ¬m cĂ¡c Ă´ trá»‘ng cĂ³ quĂ¢n xung quanh
+        // Tìm các ô trống có quân xung quanh
         for (let row = 0; row < this.BOARD_SIZE; row++) {
             for (let col = 0; col < this.BOARD_SIZE; col++) {
                 if (this.board[row][col] === this.EMPTY && this.hasAdjacentPiece(row, col)) {
@@ -122,19 +122,19 @@ class CaroGame {    constructor() {
         let score = 0;
         const directions = [
             [[0, 1], [0, -1]],  // Ngang
-            [[1, 0], [-1, 0]],  // Dá»c
-            [[1, 1], [-1, -1]], // ChĂ©o xuá»‘ng
-            [[1, -1], [-1, 1]]  // ChĂ©o lĂªn
+            [[1, 0], [-1, 0]],  // Dọc
+            [[1, 1], [-1, -1]], // Chéo xuống
+            [[1, -1], [-1, 1]]  // Chéo lên
         ];
 
         for (const [dir1, dir2] of directions) {
             const isDiagonal = Math.abs(dir1[0]) === 1 && Math.abs(dir1[1]) === 1;
             const pattern = this.getPattern(row, col, dir1, dir2, this.AI);
             
-            // TĂ­nh Ä‘iá»ƒm dá»±a trĂªn máº«u
+            // Tính điểm dựa trên mẫu
             let patternScore = this.getPatternScore(pattern, true);
             
-            // Cá»™ng thĂªm Ä‘iá»ƒm cho Ä‘Æ°á»ng chĂ©o
+            // Cộng thêm điểm cho đường chéo
             if (isDiagonal) {
                 patternScore *= this.ATTACK_SCORES.DIAGONAL_BONUS;
             }
@@ -149,19 +149,19 @@ class CaroGame {    constructor() {
         let score = 0;
         const directions = [
             [[0, 1], [0, -1]],  // Ngang
-            [[1, 0], [-1, 0]],  // Dá»c
-            [[1, 1], [-1, -1]], // ChĂ©o xuá»‘ng
-            [[1, -1], [-1, 1]]  // ChĂ©o lĂªn
+            [[1, 0], [-1, 0]],  // Dọc
+            [[1, 1], [-1, -1]], // Chéo xuống
+            [[1, -1], [-1, 1]]  // Chéo lên
         ];
 
         for (const [dir1, dir2] of directions) {
             const isDiagonal = Math.abs(dir1[0]) === 1 && Math.abs(dir1[1]) === 1;
             const pattern = this.getPattern(row, col, dir1, dir2, this.HUMAN);
             
-            // TĂ­nh Ä‘iá»ƒm dá»±a trĂªn máº«u
+            // Tính điểm dựa trên mẫu
             let patternScore = this.getPatternScore(pattern, false);
             
-            // Cá»™ng thĂªm Ä‘iá»ƒm cho Ä‘Æ°á»ng chĂ©o
+            // Cộng thêm điểm cho đường chéo
             if (isDiagonal) {
                 patternScore *= this.DEFENSE_SCORES.DIAGONAL_BONUS;
             }
@@ -176,7 +176,7 @@ class CaroGame {    constructor() {
         let count = 1;
         let openEnds = 0;
 
-        // Kiá»ƒm tra hÆ°á»›ng thá»© nháº¥t
+        // Kiểm tra hướng thứ nhất
         let r = row + dir1[0];
         let c = col + dir1[1];
         let blocked1 = false;
@@ -195,7 +195,7 @@ class CaroGame {    constructor() {
             c += dir1[1];
         }
 
-        // Kiá»ƒm tra hÆ°á»›ng thá»© hai
+        // Kiểm tra hướng thứ hai
         r = row + dir2[0];
         c = col + dir2[1];
         let blocked2 = false;
@@ -274,16 +274,16 @@ class CaroGame {    constructor() {
         if (this.isWinner(row, col, this.HUMAN)) {
             this.playerScore++;
             this.highlightWinningCells();
-            this.endGame('Báº¡n tháº¯ng!');
+            this.endGame('Bạn thắng!');
             return;
         }
 
         if (this.isDraw()) {
-            this.endGame('HĂ²a!');
+            this.endGame('Hòa!');
             return;
         }        // AI's move
         this.isProcessing = true;
-        document.getElementById('status').textContent = 'LÆ°á»£t cá»§a mĂ¡y (X)...';
+        document.getElementById('status').textContent = 'Lượt của máy (X)...';
         
         // Use requestAnimationFrame for smoother UI updates
         requestAnimationFrame(() => {
@@ -296,16 +296,16 @@ class CaroGame {    constructor() {
                 if (this.isWinner(aiMove.row, aiMove.col, this.AI)) {
                     this.computerScore++;
                     this.highlightWinningCells();
-                    this.endGame('MĂ¡y tháº¯ng!');
+                    this.endGame('Máy thắng!');
                     return;
                 }
 
                 if (this.isDraw()) {
-                    this.endGame('HĂ²a!');
+                    this.endGame('Hòa!');
                     return;
                 }
             }            this.isProcessing = false;
-            document.getElementById('status').textContent = 'LÆ°á»£t cá»§a báº¡n (O)';
+            document.getElementById('status').textContent = 'Lượt của bạn (O)';
         });
     }
 
@@ -353,26 +353,26 @@ class CaroGame {    constructor() {
     }    updateCell(row, col) {
         const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
         if (cell) {
-            // XĂ³a classes cÅ©
+            // Xóa classes cũ
             cell.classList.remove('x', 'o', 'last-move');
             
-            // ThĂªm ná»™i dung vĂ  class má»›i
+            // Thêm nội dung và class mới
             if (this.board[row][col] === this.AI) {
-                cell.textContent = 'âœ•';
+                cell.textContent = '✕';
                 cell.classList.add('x');
             } else if (this.board[row][col] === this.HUMAN) {
-                cell.textContent = 'â—¯';
+                cell.textContent = '◯';
                 cell.classList.add('o');
             } else {
                 cell.textContent = '';
             }
             
-            // ÄĂ¡nh dáº¥u nÆ°á»›c Ä‘i má»›i nháº¥t
+            // Đánh dấu nước đi mới nhất
             if (this.lastMove && this.lastMove.row === row && this.lastMove.col === col) {
                 cell.classList.add('last-move');
             }
             
-            // ThĂªm hiá»‡u á»©ng khi Ä‘Ă¡nh
+            // Thêm hiệu ứng khi đánh
             cell.style.transform = 'scale(0.8)';
             setTimeout(() => {
                 cell.style.transform = 'scale(1)';
@@ -381,14 +381,14 @@ class CaroGame {    constructor() {
     }
 
     highlightWinningCells() {
-        // Táº¡o hiá»‡u á»©ng highlight tá»«ng Ă´ má»™t
+        // Tạo hiệu ứng highlight từng ô một
         this.winningCells.forEach(([row, col], index) => {
             setTimeout(() => {
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
                     cell.classList.add('win-cell');
                 }
-            }, index * 100); // Delay 100ms cho má»—i Ă´
+            }, index * 100); // Delay 100ms cho mỗi ô
         });
     }
 
@@ -405,7 +405,7 @@ class CaroGame {    constructor() {
         this.winningCells = [];
         this.lastMove = null;
         this.initializeBoard();
-        document.getElementById('status').textContent = 'LÆ°á»£t cá»§a báº¡n (O)';
+        document.getElementById('status').textContent = 'Lượt của bạn (O)';
     }
 
     hasAdjacentMark(row, col, range) {
